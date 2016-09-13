@@ -1,0 +1,2 @@
+include ':libuvccamera'
+include ':usbCameraTest4'
