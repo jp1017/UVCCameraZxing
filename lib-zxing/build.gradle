@@ -1,0 +1,80 @@
+/*
+******************* Copyright (c) ***********************\
+**
+**         (c) Copyright 2015, 蒋朋, china,. sd
+**                  All Rights Reserved
+**
+**
+**                       _oo0oo_
+**                      o8888888o
+**                      88" . "88
+**                      (| -_- |)
+**                      0\  =  /0
+**                    ___/`---'\___
+**                  .' \\|     |// '.
+**                 / \\|||  :  |||// \
+**                / _||||| -:- |||||- \
+**               |   | \\\  -  /// |   |
+**               | \_|  ''\---/''  |_/ |
+**               \  .-\__  '-'  ___/-. /
+**             ___'. .'  /--.--\  `. .'___
+**          ."" '<  `.___\_<|>_/___.' >' "".
+**         | | :  `- \`.;`\ _ /`;.`/ - ` : | |
+**         \  \ `_.   \_ __\ /__ _/   .-` /  /
+**     =====`-.____`.___ \_____/___.-`___.-'=====
+**                       `=---='
+**
+**
+**     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**
+**               佛祖保佑         永无BUG
+**
+**
+**                   南无本师释迦牟尼佛
+**
+
+**----------------------版本信息------------------------
+** 版    本: V0.1
+**
+******************* End of Head **********************\
+*/
+
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:23.4.0'
+    testCompile 'junit:junit:4.12'
+}
+
+ext {
+    PUBLISH_GROUP_ID = 'cn.yipianfengye.android'
+    PUBLISH_ARTIFACT_ID = 'zxing-library'
+    PUBLISH_VERSION = '1.8'
+}
+
+//apply from: 'https://raw.githubusercontent.com/blundell/release-android-library/master/android-release-aar.gradle'

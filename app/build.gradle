@@ -1,0 +1,26 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+
+    defaultConfig {
+        applicationId "com.serenegiant.usbcameratest4"
+        minSdkVersion 18
+        targetSdkVersion 23
+		versionCode 8
+		versionName "2.30"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
+        }
+    }
+}
+
+dependencies {
+    compile project(':libuvccamera')
+    compile project(':lib-zxing')
+}
