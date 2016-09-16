@@ -28,7 +28,7 @@ dependencies {
     compile fileTree(dir: new File(buildDir, 'libs'), include: '*.jar')
 }
 
-tasks.withType(JavaCompile) {
+/*tasks.withType(JavaCompile) {
 	compileTask -> compileTask.dependsOn ndkBuild
 }
 
@@ -42,4 +42,4 @@ task ndkBuild(type: Exec, description: 'Compile JNI source via NDK') {
 		ndkBuildPath = ndkBuildingDir + '/ndk-build'
 	}
 	commandLine ndkBuildPath, '-j8', '-C', file('src/main').absolutePath
-}
+}*/
