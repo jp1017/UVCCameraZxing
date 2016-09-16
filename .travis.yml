@@ -12,20 +12,17 @@ git:
   submodules: false
 before_install:
 - chmod +x gradlew
-- gem install fir-cli
 script:
-- ./gradlew assembleDebug
+- "./gradlew assembleDebug"
 before_deploy:
 - mv app/build/outputs/apk/app-debug.apk app/build/outputs/apk/UVCCameraZxing.apk
 deploy:
   provider: releases
   api_key:
-    secure: PIlGzAlU0oMeJpTcspW9UdHWbDJunQNXJhfsuLaSntP3Y+G57GcDTUswdAo7mDq9wL1qXh75WnYM6lzpqvoALZzclI632qGnGVbJL0P+ytpH0AufHj1tDSVQFj5xo2UvOJq1BpSBIkSNsLybsk4BTXBWAv4+FzaVLQ87kqcCtEUAJ2EHNhVP9jugC89l+mpq0pyLol3KoWrbq7v2u/z7/+dXUEYWLRxX7K1S/p4w3pangCaDSu+5kRz3fH9IN2EX2gHMLhUSdssR7s4xVRjuqj4ytgXBj5VXN0BzT5n90a0A9+oMapuQjw6wuO4vs9lRQ7UMg0rOllbfohKcUNQUC7qtkWM6HFhdESMSPuSZ266CqOj1pYmNZqODdFZSEil+lvdrdIBY9grWpV7kBSP/BE7/DRZQNNSYj3zR1Pm3lyE8ccYjH/vPmbVY1p+NsB9Afc1u6JLBUDjLRxN4GTSP566D1Hg/5Ycl7zCn01+5dBGg5AkPI4HvLV2SpDqfOr11a9SryA+14Zp2FiBVf4zYgcCFVtTyC+1Rr4xPNIMy3fgLPgSA9i6cTT29DEKFeE1n+CSAzxcf1DlXPCbUErIvGnUGW6imbgl0TtitCBv1mYz42mxKFbrk9dGMP/k4UKgYEEP3M+KmSFhQN9kbtLfljWoP86xGvhawDA+GBrz46Lc=
+    secure: AIR/8UHQVp8PYh/cHXnOG5wlHUrNQEjREzfAoGtIrkRUgykc8YWKF/yNO3SO75Gx6UKQUrYcM0tElq7btgFGJbq5xEtxrnK2pon4DJnCwBQEEow6tMEnb9Q09h0t5gUxKZ+nN6JHadk4snosXSxgKUiZ5eyaOreWPQtSWzQGBQcWUEgeA8+nXUa6HeddasF75riFssldgxmn96vSnmE/Smi3WyIiD1SRjmOI/y2PTm5Q0XK4ewa30gqQnt0H1x+c556NLZ68+3j461k8nJwW3NjYZvdX6NeyN1UZcydk8HAvFfhiuedAdqVoytlPQKT08DLffiKDJAianpCTBDCHlstG8WgtY/SYPUXxTSxirl4MBgbFWkfHBGXwT44a4TIZXHpZt7j8dtinoXcJYAJ4HHJnxNBQIiz5vd5A33ko3XuL/hI3o8Y4P8HzXfR6oBQ9d3iLVSUxMhBK9zoZjh2pr0Z94RjSN5xPqxgAIfSGTuYeijz3WWw8NDA1JAw1io6laTySx6CGU+YdaHxmgYeNezJanEzkCOSyOu3UoT567L9qxVOC/LVHNR4sWf1mL4VP3zaq5C4PdDmrAlzi+83II6vKeRejoV71JnQRmeZ+y+ypMK1Qkseyiw3doN52VIN/NhMLao9ZlzoL+98J4KlxGQXkTe+lXAaMoNfYbVxxYpg=
   file: app/build/outputs/apk/UVCCameraZxing.apk
-  skip_cleanup: true
   on:
-    tags: true
-    all_branches: true
     repo: jp1017/UVCCameraZxing
 after_deploy:
-- fir p app/build/outputs/apk/UVCCameraZxing.apk -T $FIR_TOKEN -c "`git cat-file tag $TRAVIS_TAG`"
+- fir p app/build/outputs/apk/UVCCameraZxing.apk -T $FIR_TOKEN -c "`git cat-file tag
+  $TRAVIS_TAG`"
