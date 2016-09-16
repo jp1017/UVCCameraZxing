@@ -64,30 +64,26 @@ package com.serenegiant.usbcamerazxing;
 */
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Fragment;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.hardware.usb.UsbDevice;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.SystemClock;
-import android.app.AlertDialog;
+import android.os.Handler;
+import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Surface;
-import android.view.SurfaceView;
+import android.view.TextureView;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.ImageButton;
-import android.widget.Toast;
-import android.widget.ToggleButton;
+import android.widget.ImageView;
 
-import com.serenegiant.encoder.MediaMuxerWrapper;
 import com.serenegiant.serviceclient.CameraClient;
 import com.serenegiant.serviceclient.ICameraClient;
 import com.serenegiant.serviceclient.ICameraClientCallback;
@@ -97,61 +93,35 @@ import com.serenegiant.usb.USBMonitor;
 import com.serenegiant.usb.USBMonitor.OnDeviceConnectListener;
 import com.serenegiant.usb.USBMonitor.UsbControlBlock;
 import com.serenegiant.widget.CameraViewInterface;
+import com.uuzuche.lib_zxing.activity.CodeUtils;
 
 import java.util.List;
 
-public class CameraFragment extends Fragment{
+public class QRScanFragment extends Fragment{
 	private static final boolean DEBUG = true;
 	private static final String TAG = "CameraFragment";
 
 	private static final int DEFAULT_WIDTH = 640;
 	private static final int DEFAULT_HEIGHT = 480;
 
-	//接收广播用
-	public static final String ACTION_QR_GET = "ACTION_QR_GET";
-
-	private IntentFilter mIntentFilter;         //意图过滤器，用于过滤广播
-	private BroadcastReceiver mQrReceiver;      //二维码广播
-
 	private USBMonitor mUSBMonitor;
 	private ICameraClient mCameraClient;
 
-	private ToggleButton mPreviewButton;
-	private ImageButton mRecordButton;
-	private ImageButton mStillCaptureButton;
 	private CameraViewInterface mCameraView;
-	private SurfaceView mCameraViewSub;
-	private boolean isSubView;
+	private ImageView mImageView;               //扫描动画
+	private TranslateAnimation mAnimation;       //动画
 
-	public class QrGetBroadcast extends BroadcastReceiver {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			String action = intent.getAction();
-			switch (action) {
-				case ACTION_QR_GET:
-					final String qrString = intent.getStringExtra("qr_get");
+	private static final int MESSAGE_QR_SUCCESS = 1;
 
-					Log.w(TAG, "get Qr: " + qrString);
+	private static final int SCAN_TIME = 16;            //到达扫描时间
+	private int time2Scan;   //设置要扫描二维码的时间
+	private String mQRString;   //二维码
 
-					if (qrString.contains("error")) {
-						Toast.makeText(getActivity(), "scan err, try again!", Toast.LENGTH_SHORT).show();
-					} else {
-						new AlertDialog.Builder(getActivity())
-								.setTitle("Found QR")
-								.setMessage(qrString)
-								.setPositiveButton("OK", null)
-								.create()
-								.show();
+	private AlertDialog mDialog;
 
-					}
+	private Handler mHandler;
 
-					break;
-
-			}
-		}
-	}
-
-	public CameraFragment() {
+	public QRScanFragment() {
 		if (DEBUG) Log.v(TAG, "Constructor:");
 //		setRetainInstance(true);
 	}
@@ -172,37 +142,66 @@ public class CameraFragment extends Fragment{
 			mUSBMonitor.setDeviceFilter(filters);
 		}
 
-		//init filter
-		mIntentFilter = new IntentFilter();
-		mIntentFilter.addAction(ACTION_QR_GET);
+		initHandler();
 
-		//register broadcast
-		mQrReceiver = new QrGetBroadcast();
-		getActivity().registerReceiver(mQrReceiver, mIntentFilter);
+	}
+
+	private void initHandler() {
+		mHandler = new Handler() {
+			@Override
+			public void handleMessage(Message msg) {
+				switch (msg.what) {
+					case MESSAGE_QR_SUCCESS:
+						Log.w(TAG, "扫描二维码: " + mQRString);
+
+						if (!TextUtils.isEmpty(mQRString)) {
+							if (mDialog != null) {
+								if (mDialog.isShowing()) {
+									return;
+								}
+							}
+
+							mDialog = new AlertDialog.Builder(getActivity())
+									.setTitle("Found QR")
+									.setMessage(mQRString)
+									.setPositiveButton("OK", null)
+									.create();
+									mDialog.show();
+						}
+						break;
+				}
+
+			}
+		};
 	}
 
 	@Override
 	public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
 		if (DEBUG) Log.v(TAG, "onCreateView:");
-		final View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-		View view = rootView.findViewById(R.id.start_button);
-		view.setOnClickListener(mOnClickListener);
-		view =rootView.findViewById(R.id.stop_button);
-		view.setOnClickListener(mOnClickListener);
-		mPreviewButton = (ToggleButton)rootView.findViewById(R.id.preview_button);
-		setPreviewButton(false);
-		mPreviewButton.setEnabled(false);
-		mRecordButton = (ImageButton)rootView.findViewById(R.id.record_button);
-		mRecordButton.setOnClickListener(mOnClickListener);
-		mRecordButton.setEnabled(false);
-		mStillCaptureButton = (ImageButton)rootView.findViewById(R.id.still_button);
-		mStillCaptureButton.setOnClickListener(mOnClickListener);
-		mStillCaptureButton.setEnabled(false);
-		mCameraView = (CameraViewInterface)rootView.findViewById(R.id.camera_view);
+		final View rootView = inflater.inflate(R.layout.activity_qr_scan, container, false);
+
+		mCameraView = (CameraViewInterface)rootView.findViewById(R.id.camera_view_qr);
 		mCameraView.setAspectRatio(DEFAULT_WIDTH / (float)DEFAULT_HEIGHT);
 		mCameraView.setCallback(mCallback);
-		mCameraViewSub = (SurfaceView)rootView.findViewById(R.id.camera_view_sub);
-		mCameraViewSub.setOnClickListener(mOnClickListener);
+
+		mImageView = (ImageView) rootView.findViewById(R.id.iv_qr_scan_animate);
+		mAnimation = new TranslateAnimation(Animation.RELATIVE_TO_SELF,
+				Animation.RELATIVE_TO_SELF, 0, 240);
+		mAnimation.setDuration(4000);
+//        mAnimation.setFillAfter(true);
+
+		initHandler();
+
+		mHandler.post(new Runnable() {
+			@Override
+			public void run() {
+				//设置动画
+				mImageView.startAnimation(mAnimation);
+
+				mHandler.postDelayed(this, 4000);
+			}
+		});
+
 		return rootView;
 	}
 
@@ -218,11 +217,8 @@ public class CameraFragment extends Fragment{
 		if (DEBUG) Log.v(TAG, "onPause:");
 		if (mCameraClient != null) {
 			mCameraClient.removeSurface(mCameraView.getSurface());
-			mCameraClient.removeSurface(mCameraViewSub.getHolder().getSurface());
-			isSubView = false;
 		}
 		mUSBMonitor.unregister();
-		enableButtons(false);
 		super.onPause();
 	}
 
@@ -280,14 +276,12 @@ public class CameraFragment extends Fragment{
 				mCameraClient.release();
 				mCameraClient = null;
 			}
-			enableButtons(false);
 			updateCameraDialog();
 		}
 
 		@Override
 		public void onCancel() {
 			if (DEBUG) Log.v(TAG, "OnDeviceConnectListener#onCancel:");
-			enableButtons(false);
 		}
 	};
 
@@ -310,7 +304,6 @@ public class CameraFragment extends Fragment{
 		if (!mUSBMonitor.isRegistered()) return;
 		final List<UsbDevice> list = mUSBMonitor.getDeviceList();
 		if (list.size() > index) {
-			enableButtons(false);
 			if (mCameraClient == null)
 				mCameraClient = new CameraClient(getActivity(), mCameraListener);
 			mCameraClient.select(list.get(index));
@@ -331,6 +324,41 @@ public class CameraFragment extends Fragment{
 		public void onSurfaceDestroy(final Surface surface) {
 
 		}
+
+		@Override
+		public void onSurfaceUpdate(Surface surface) {
+			time2Scan++;
+
+			//从TextureView获得　Bitmap
+			final Bitmap bitmap = ((TextureView) mCameraView).getBitmap();
+
+			if (time2Scan > SCAN_TIME) {
+				time2Scan = 0;
+
+				mHandler.post(new Runnable() {
+					@Override
+					public void run() {
+
+						//识别二维码／条形码
+						CodeUtils.analyzeBitmap(bitmap, new CodeUtils.AnalyzeCallback() {
+							@Override
+							public void onAnalyzeSuccess(Bitmap mBitmap, String result) {
+								Log.w(TAG, "发现二维码： " + result);
+
+								mQRString = result;
+								mHandler.sendEmptyMessage(MESSAGE_QR_SUCCESS);
+
+							}
+
+							@Override
+							public void onAnalyzeFailed() {
+								Log.w(TAG, "二维码有误");
+							}
+						});
+					}
+				});
+			}
+		}
 	};
 
 	private final ICameraClientCallback mCameraListener = new ICameraClientCallback() {
@@ -338,79 +366,13 @@ public class CameraFragment extends Fragment{
 		public void onConnect() {
 			if (DEBUG) Log.v(TAG, "onConnect:");
 			mCameraClient.addSurface(mCameraView.getSurface(), false);
-			mCameraClient.addSurface(mCameraViewSub.getHolder().getSurface(), false);
-			isSubView = true;
-			enableButtons(true);
-			setPreviewButton(true);
 		}
 
 		@Override
 		public void onDisconnect() {
 			if (DEBUG) Log.v(TAG, "onDisconnect:");
-			setPreviewButton(false);
-			enableButtons(false);
 		}
 
-	};
-
-	private final OnClickListener mOnClickListener = new OnClickListener() {
-		@Override
-		public void onClick(final View v) {
-			switch (v.getId()) {
-			case R.id.start_button:
-				if (DEBUG) Log.v(TAG, "onClick:start");
-				// start service
-				final List<UsbDevice> list = mUSBMonitor.getDeviceList();
-				if (list.size() > 0) {
-					if (mCameraClient == null)
-						mCameraClient = new CameraClient(getActivity(), mCameraListener);
-					mCameraClient.select(list.get(0));
-					mCameraClient.resize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
-					mCameraClient.connect();
-					setPreviewButton(false);
-				}
-				break;
-			case R.id.stop_button:
-				if (DEBUG) Log.v(TAG, "onClick:stop");
-				// stop service
-				if (mCameraClient != null) {
-					mCameraClient.disconnect();
-					mCameraClient.release();
-					mCameraClient = null;
-				}
-				enableButtons(false);
-				break;
-			case R.id.camera_view_sub:
-				if (DEBUG) Log.v(TAG, "onClick:sub view");
-				if (isSubView) {
-					mCameraClient.removeSurface(mCameraViewSub.getHolder().getSurface());
-				} else {
-					mCameraClient.addSurface(mCameraViewSub.getHolder().getSurface(), false);
-				}
-				isSubView = !isSubView;
-				break;
-			case R.id.record_button:
-				if (DEBUG) Log.v(TAG, "onClick:record");
-				if (mCameraClient.isRecording()) {
-					mRecordButton.setColorFilter(0);
-					mCameraClient.stopRecording();
-				} else {
-					mCameraClient.startRecording();
-					mRecordButton.setColorFilter(0x7fff0000);
-				}
-				break;
-			case R.id.still_button:
-				if (DEBUG) Log.v(TAG, "onClick:still capture");
-
-				SystemClock.sleep(1000);
-
-				Toast.makeText(getActivity(), "scaning", Toast.LENGTH_SHORT).show();
-
-				if (mCameraClient != null)
-					mCameraClient.captureStill(MediaMuxerWrapper.getCaptureFile(Environment.DIRECTORY_DCIM, ".png").toString());
-				break;
-			}
-		}
 	};
 
 	private final OnCheckedChangeListener mOnCheckedChangeListener = new OnCheckedChangeListener() {
@@ -427,34 +389,5 @@ public class CameraFragment extends Fragment{
 		}
 	};
 
-	private void setPreviewButton(final boolean onoff) {
-		getActivity().runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				mPreviewButton.setOnCheckedChangeListener(null);
-				try {
-					mPreviewButton.setChecked(onoff);
-				} finally {
-					mPreviewButton.setOnCheckedChangeListener(mOnCheckedChangeListener);
-				}
-			}
-		});
-	}
-
-	private final void enableButtons(final boolean enable) {
-		setPreviewButton(false);
-		getActivity().runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				mPreviewButton.setEnabled(enable);
-				mRecordButton.setEnabled(enable);
-				mStillCaptureButton.setEnabled(enable);
-				if (enable && mCameraClient.isRecording())
-					mRecordButton.setColorFilter(0x7fff0000);
-				else
-					mRecordButton.setColorFilter(0);
-			}
-		});
-	}
 
 }

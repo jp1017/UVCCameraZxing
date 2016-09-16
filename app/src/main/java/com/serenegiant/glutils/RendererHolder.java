@@ -23,7 +23,6 @@ package com.serenegiant.glutils;
  * Files in the jni/libjpeg, jni/libusb, jin/libuvc, jni/rapidjson folder may have a different license, see the respective files.
 */
 
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
 import android.graphics.SurfaceTexture.OnFrameAvailableListener;
@@ -34,10 +33,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.Surface;
 
-import com.serenegiant.app.UVCApplication;
 import com.serenegiant.service.IUVCServiceOnFrameAvailable;
-import com.serenegiant.usbcamerazxing.CameraFragment;
-import com.uuzuche.lib_zxing.activity.CodeUtils;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -378,25 +374,6 @@ public class RendererHolder implements Runnable {
 						        buf.clear();
 					            bmp.copyPixelsFromBuffer(buf);
 								bmp.compress(Bitmap.CompressFormat.PNG, 90, os);
-
-								//get qr string
-								CodeUtils.analyzeBitmap(bmp, new CodeUtils.AnalyzeCallback() {
-									@Override
-									public void onAnalyzeSuccess(Bitmap mBitmap, String result) {
-										qrString = result;
-									}
-
-									@Override
-									public void onAnalyzeFailed() {
-										qrString = "error";
-									}
-								});
-
-								/** 发送广播到 {@link QRScanActivity} 去处理 */
-								Intent intent = new Intent(CameraFragment.ACTION_QR_GET);
-								intent.putExtra("qr_get", qrString);
-								UVCApplication.getInstance().sendBroadcast(intent);
-
 								bmp.recycle();
 					        } finally {
 					            if (os != null) os.close();

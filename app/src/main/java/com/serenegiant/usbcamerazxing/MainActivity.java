@@ -41,7 +41,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		if (savedInstanceState == null) {
 			if (DEBUG) Log.i(TAG, "onCreate:new");
-			final Fragment fragment = new CameraFragment();
+			final Fragment fragment = new QRScanFragment();
 			getFragmentManager().beginTransaction()
 					.add(R.id.container, fragment).commit();
 		}

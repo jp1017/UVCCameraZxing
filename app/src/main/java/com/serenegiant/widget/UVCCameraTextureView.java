@@ -95,6 +95,8 @@ public class UVCCameraTextureView extends TextureView	// API >= 14
 
 	@Override
 	public void onSurfaceTextureUpdated(final SurfaceTexture surface) {
+
+		mCallback.onSurfaceUpdate(getSurface());
 	}
 
 	@Override
