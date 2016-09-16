@@ -1,7 +1,7 @@
 USB 摄像头二维码识别
 =========
 
-![https://travis-ci.org/jp1017/UVCCameraZxing.svg?branch=master](https://travis-ci.org/jp1017/UVCCameraZxing)
+[![Build Status](https://travis-ci.org/jp1017/UVCCameraZxing.svg?branch=master)](https://travis-ci.org/jp1017/UVCCameraZxing)
 
 usb摄像头识别二维码，涉及安卓技术：
 
