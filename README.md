@@ -9,10 +9,15 @@ usb摄像头识别二维码，涉及安卓技术：
 4. 二维码/条码识别,支持选择图片识别
 5. USB连接
 
-+ 运行项目，点击拍照按钮，即可识别二维码
++ 运行项目，连接USB摄像头，即可识别二维码
 
-<img src="./1.png" width="320"/> <img src="./2.png" width="320"/> <img src="./3.png" width="320"/>
+|扫描二维码|识别结果|选择相册|
+|:---:|:---:|:---|
+|<img src="./1.png" width="320"/>|<img src="./2.png" width="320"/>|<img src="./3.png" width="320"/>|
 
+
+
+同样也可识别条码，详细使用请参考我的博客: [USB摄像头预览识别二维码](https://jp1017.github.io/2016/09/15/USB%E6%91%84%E5%83%8F%E5%A4%B4%E9%A2%84%E8%A7%88%E8%AF%86%E5%88%AB%E4%BA%8C%E7%BB%B4%E7%A0%81/)
 参考：
 
 + https://github.com/saki4510t/UVCCamera/tree/master/usbCameraTest4
