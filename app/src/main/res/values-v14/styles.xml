@@ -5,8 +5,19 @@
         AppBaseTheme from BOTH res/values/styles.xml and
         res/values-v11/styles.xml on API 14+ devices.
     -->
-    <style name="AppBaseTheme" parent="android:Theme.Holo.Light.DarkActionBar">
+    <style name="AppBaseTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- API 14 theme customizations can go here. -->
+    </style>
+
+    <!--Toolbar主题-->
+    <style name="ToolBarTheme" parent="@style/ThemeOverlay.AppCompat.ActionBar">
+        <item name="actionMenuTextColor">@color/WHITE</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <!--toolbar字体大小布局-->
+    <style name="ToolBarTextSize" parent="@style/Base.TextAppearance.AppCompat.Title">
+        <item name="android:textSize">20sp</item>
     </style>
 
 </resources>

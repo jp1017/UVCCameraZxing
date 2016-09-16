@@ -23,22 +23,46 @@ package com.serenegiant.usbcamerazxing;
  * Files in the jni/libjpeg, jni/libusb, jin/libuvc, jni/rapidjson folder may have a different license, see the respective files.
 */
 
-import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Fragment;
-import android.content.pm.ActivityInfo;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.Window;
+import android.widget.Toast;
 
-public class MainActivity extends Activity {
+import com.serenegiant.utils.ImageUtil;
+import com.uuzuche.lib_zxing.activity.CodeUtils;
+
+public class MainActivity extends AppCompatActivity {
 	private static final boolean DEBUG = false;
 	private static final String TAG = "MainActivity";
+
+	private Toolbar mToolbar;
+
+	//选择图片后的识别码
+	private static final int REQUEST_QR_IMAGE = 480;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_main);
+
+		mToolbar = (Toolbar) findViewById(R.id.toolbar);
+
+		mToolbar.setTitle("二维码识别");
+		mToolbar.setTitleTextColor(Color.WHITE);
+		setSupportActionBar(mToolbar);
+		mToolbar.setNavigationIcon(R.drawable.ic_actionbar_back);
+
 		if (savedInstanceState == null) {
 			if (DEBUG) Log.i(TAG, "onCreate:new");
 			final Fragment fragment = new QRScanFragment();
@@ -47,38 +71,76 @@ public class MainActivity extends Activity {
 		}
 	}
 
+	/**
+	 * 相册选择后处理
+	 * @param requestCode
+	 * @param resultCode
+	 * @param data
+	 */
 	@Override
-	protected void onResume() {
-		super.onResume();
-		if (DEBUG) Log.v(TAG, "onResume:");
-//		updateScreenRotation();
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+
+		if (requestCode == REQUEST_QR_IMAGE) {
+			if (data != null) {
+				Uri uri = data.getData();
+				try {
+					CodeUtils.analyzeBitmap(ImageUtil.getImageAbsolutePath(this, uri), new CodeUtils.AnalyzeCallback() {
+						@Override
+						public void onAnalyzeSuccess(Bitmap Bitmap, String result) {
+							Log.w(TAG, "qrcode: " + result);
+
+							new AlertDialog.Builder(MainActivity.this)
+									.setTitle("Found QR")
+									.setMessage(result)
+									.setPositiveButton("OK", null)
+									.create()
+									.show();
+
+						}
+
+						@Override
+						public void onAnalyzeFailed() {
+							Toast.makeText(MainActivity.this, ("解析二维码失败"), Toast.LENGTH_LONG).show();
+						}
+					});
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	/**
+	 * actionbar右侧添加菜单
+	 * @param menu 要添加的菜单
+	 * @return
+	 */
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.menu_pic_select, menu);
+		return true;
 	}
 
 	@Override
-	protected void onPause() {
-		if (DEBUG) Log.v(TAG, "onPause:isFinishing=" + isFinishing());
-		super.onPause();
-	}
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case android.R.id.home:
+				finish();
+				break;
 
-	@Override
-	protected void onDestroy() {
-		if (DEBUG) Log.v(TAG, "onDestroy:");
-		super.onDestroy();
-	}
+			//相册选择
+			case R.id.menu_pic_select:
+				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+				intent.addCategory(Intent.CATEGORY_OPENABLE);
+				intent.setType("image/*");
+				startActivityForResult(intent, REQUEST_QR_IMAGE);
+				break;
 
-	protected final void updateScreenRotation() {
-        final int screenRotation = 2;
-        switch (screenRotation) {
-        case 1:
-        	setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
-        	break;
-        case 2:
-        	setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-        	break;
-        default:
-        	setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-        	break;
-        }
+			default:
+				break;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 }

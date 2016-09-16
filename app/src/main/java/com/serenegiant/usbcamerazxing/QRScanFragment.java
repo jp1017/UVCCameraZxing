@@ -178,7 +178,7 @@ public class QRScanFragment extends Fragment{
 	@Override
 	public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
 		if (DEBUG) Log.v(TAG, "onCreateView:");
-		final View rootView = inflater.inflate(R.layout.activity_qr_scan, container, false);
+		final View rootView = inflater.inflate(R.layout.fragment_qr_scan, container, false);
 
 		mCameraView = (CameraViewInterface)rootView.findViewById(R.id.camera_view_qr);
 		mCameraView.setAspectRatio(DEFAULT_WIDTH / (float)DEFAULT_HEIGHT);
