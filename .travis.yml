@@ -11,6 +11,8 @@ android:
 git:
   submodules: false
 before_install:
+- git clone https://github.com/urho3d/android-ndk.git $HOME/android-ndk-root
+- export ANDROID_NDK_HOME=$HOME/android-ndk-root
 - chmod +x gradlew
 script:
 - "./gradlew assembleDebug"
@@ -22,6 +24,8 @@ deploy:
     secure: AIR/8UHQVp8PYh/cHXnOG5wlHUrNQEjREzfAoGtIrkRUgykc8YWKF/yNO3SO75Gx6UKQUrYcM0tElq7btgFGJbq5xEtxrnK2pon4DJnCwBQEEow6tMEnb9Q09h0t5gUxKZ+nN6JHadk4snosXSxgKUiZ5eyaOreWPQtSWzQGBQcWUEgeA8+nXUa6HeddasF75riFssldgxmn96vSnmE/Smi3WyIiD1SRjmOI/y2PTm5Q0XK4ewa30gqQnt0H1x+c556NLZ68+3j461k8nJwW3NjYZvdX6NeyN1UZcydk8HAvFfhiuedAdqVoytlPQKT08DLffiKDJAianpCTBDCHlstG8WgtY/SYPUXxTSxirl4MBgbFWkfHBGXwT44a4TIZXHpZt7j8dtinoXcJYAJ4HHJnxNBQIiz5vd5A33ko3XuL/hI3o8Y4P8HzXfR6oBQ9d3iLVSUxMhBK9zoZjh2pr0Z94RjSN5xPqxgAIfSGTuYeijz3WWw8NDA1JAw1io6laTySx6CGU+YdaHxmgYeNezJanEzkCOSyOu3UoT567L9qxVOC/LVHNR4sWf1mL4VP3zaq5C4PdDmrAlzi+83II6vKeRejoV71JnQRmeZ+y+ypMK1Qkseyiw3doN52VIN/NhMLao9ZlzoL+98J4KlxGQXkTe+lXAaMoNfYbVxxYpg=
   file: app/build/outputs/apk/UVCCameraZxing.apk
   on:
+    tags: true
+    all_branches: true
     repo: jp1017/UVCCameraZxing
 after_deploy:
 - fir p app/build/outputs/apk/UVCCameraZxing.apk -T $FIR_TOKEN -c "`git cat-file tag
