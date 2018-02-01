@@ -3,6 +3,11 @@ USB 摄像头二维码识别
 
 [![Build Status](https://travis-ci.org/jp1017/UVCCameraZxing.svg?branch=master)](https://travis-ci.org/jp1017/UVCCameraZxing)
 
+## 2.40
+1. 升级lib库
+1. 升级zxing库到3.3.2
+1. 生成彩色二维码
+
 usb摄像头识别二维码，涉及安卓技术：
 
 1. TextureView 使用

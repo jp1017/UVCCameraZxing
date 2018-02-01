@@ -1,4 +1,4 @@
-package com.uuzuche.lib_zxing.camera;
+package com.uuzuche.lib_zxing;
 
 import android.graphics.Bitmap;
 

@@ -93,7 +93,7 @@ import com.serenegiant.usb.USBMonitor;
 import com.serenegiant.usb.USBMonitor.OnDeviceConnectListener;
 import com.serenegiant.usb.USBMonitor.UsbControlBlock;
 import com.serenegiant.widget.CameraViewInterface;
-import com.uuzuche.lib_zxing.activity.CodeUtils;
+import com.uuzuche.lib_zxing.CodeUtils;
 
 import java.util.List;
 

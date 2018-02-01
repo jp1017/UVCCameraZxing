@@ -39,7 +39,7 @@ import android.view.Window;
 import android.widget.Toast;
 
 import com.serenegiant.utils.ImageUtil;
-import com.uuzuche.lib_zxing.activity.CodeUtils;
+import com.uuzuche.lib_zxing.CodeUtils;
 
 public class MainActivity extends AppCompatActivity {
 	private static final boolean DEBUG = false;
